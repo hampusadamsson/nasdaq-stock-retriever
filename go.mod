@@ -1,4 +1,4 @@
-module nasdaq-stock-retriever
+module github.com/hampusadamsson/nasdaq-stock-retriever
 
 go 1.18
 
