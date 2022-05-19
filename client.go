@@ -26,14 +26,33 @@ func RetrieveStocksFromApi() *RetrievedListings {
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36")
 	resp, _ := client.Do(req)
 	jsonStr, _ := io.ReadAll(resp.Body)
-	data := serialize(jsonStr)
+	inputProperJson := jsonStr[42 : len(jsonStr)-2] //Remove the Jquery String prefix- and suffix
+	data := serialize[RetrievedListings](inputProperJson)
 	defer resp.Body.Close()
 	return data
 }
 
-func serialize(jsonStr []byte) *RetrievedListings {
-	inputProperJson := jsonStr[42 : len(jsonStr)-2] //Remove the Jquery String prefix- and suffix
-	var data RetrievedListings
-	json.Unmarshal([]byte(inputProperJson), &data)
+// symbol ex. SSE992
+func RetrieveStock(symbol string) *History {
+	client := &http.Client{}
+	today := time.Now().String()[:10]
+	url := "http://www.nasdaqomxnordic.com/webproxy/DataFeedProxy.aspx?SubSystem=History&Action=GetChartData&inst.an=id%2Cnm%2Cfnm%2Cisin%2Ctp%2Cchp%2Cycp&FromDate=1986-01-01&ToDate=" + today + "&json=true&showAdjusted=true&app=%2Faktier%2Fmicrosite-MicrositeChart-history&timezone=CET&DefaultDecimals=false&Instrument=" + symbol
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("Accept", "application/json, text/javascript, */*; q=0.01")
+	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
+	req.Header.Set("Connection", "keep-alive")
+	//req.Header.Set("Referer", "http://www.nasdaqomxnordic.com/aktier/microsite?Instrument=SSE992&name=Hennes%20%26%20Mauritz%20B&ISIN=SE0000106270")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Safari/537.36")
+	req.Header.Set("X-Requested-With", "XMLHttpRequest")
+	resp, _ := client.Do(req)
+	jsonStr, _ := io.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	data := serialize[History](jsonStr)
+	return data
+}
+
+func serialize[T any](jsonStr []byte) *T {
+	var data T
+	json.Unmarshal([]byte(jsonStr), &data)
 	return &data
 }

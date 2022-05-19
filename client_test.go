@@ -2,7 +2,6 @@ package stockclient
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 	"time"
 
@@ -26,7 +25,6 @@ func TestRetrieve(t *testing.T) {
 }
 
 func TestRetrieveWithTTLcache(t *testing.T) {
-	fmt.Println("Start")
 	r := CreateRetriever(RetrieveStocksDummy, 2*time.Second)
 	ts := r.RetrieveStocks().TimeStamp
 	time.Sleep(1 * time.Second)
@@ -34,3 +32,15 @@ func TestRetrieveWithTTLcache(t *testing.T) {
 	time.Sleep(2 * time.Second)
 	assert.NotEqual(t, ts, r.RetrieveStocks().TimeStamp)
 }
+
+func TestSerialiseHistory(t *testing.T) {
+	jsonString := "{  \"@status\": \"1\",  \"@ts\": \"1652819614811\",  \"data\": [    {      \"instData\": {        \"@id\": \"SSE992\",        \"@nm\": \"HM B\",        \"@fnm\": \"Hennes & Mauritz B\",        \"@isin\": \"SE0000106270\",        \"@tp\": \"S\",        \"@chp\": \"1.9001\",        \"@ycp\": \"130.52\"      },      \"chartData\": {        \"cp\": [          [            536544000000,            2.325          ],          [            536803200000,            2.3          ],          [            536976000000,            2.225          ],          [            1652659200000,            130.52          ]        ]      }    }  ]}"
+	var d History
+	json.Unmarshal([]byte(jsonString), &d)
+	assert.Equal(t, "SSE992", d.Data[0].InstData.ID)
+}
+
+// func TestRetrieveSpecific(t *testing.T) {
+// 	ret := RetrieveStock("SSE992")
+// 	fmt.Println(ret)
+// }
