@@ -7,12 +7,14 @@ import (
 	"github.com/jellydator/ttlcache/v3"
 )
 
+//Retriever wraps the stock client with a cache
 type Retriever struct {
 	cache ttlcache.Cache[string, RetrievedListings]
 }
 
 type retrieverFunction func() *RetrievedListings
 
+//CreateRetriever creates the client and adds a cache with a ttl attached to it
 func CreateRetriever(fun retrieverFunction, ttl time.Duration) *Retriever {
 	loader := ttlcache.LoaderFunc[string, RetrievedListings](
 		func(c *ttlcache.Cache[string, RetrievedListings], key string) *ttlcache.Item[string, RetrievedListings] {
@@ -33,6 +35,7 @@ func CreateRetriever(fun retrieverFunction, ttl time.Duration) *Retriever {
 	}
 }
 
+//RetrieveStocks retrieve all listings from 1) cache, or 2) from source if stale
 func (r *Retriever) RetrieveStocks() *RetrievedListings {
 	val := r.cache.Get("stocks").Value()
 	return &val

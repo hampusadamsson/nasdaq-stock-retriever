@@ -1,5 +1,6 @@
 package stockclient
 
+// Stock is the primary datatype for value of a stock
 type Stock struct {
 	ID       string `json:"@id"`
 	Ticker   string `json:"@nm"`
