@@ -16,10 +16,35 @@ func RetrieveStocksDummy() *RetrievedListings {
 	}
 }
 
-// RetrieveStocksFromAPIgo retrieves data for a wide list of stocks
-func RetrieveStocksFromAPIgo() *RetrievedListings {
+// FetchAllNordicAssets retrieves data for a wide list of stocks
+func FetchAllNordicAssets() *RetrievedListings {
+	return RetrieveStocks(RegionAll)
+}
+
+// FetchStockholmAssets retrieves data from the Stockholm stock exchange
+func FetchStockholmAssets() *RetrievedListings {
+	return RetrieveStocks(RegionStockholm)
+}
+
+// FetchCopoenhagenAssets retrieves data from the Copenhagen stock exchange
+func FetchCopoenhagenAssets() *RetrievedListings {
+	return RetrieveStocks(RegionCopenhagen)
+}
+
+// FetchBalticAssets retrieves data from the Baltic stock exchange
+func FetchBalticAssets() *RetrievedListings {
+	return RetrieveStocks(RegionBaltic)
+}
+
+// FetchIcelandAssets retrieves data from the Iceland stock exchange
+func FetchIcelandAssets() *RetrievedListings {
+	return RetrieveStocks(RegionIceland)
+}
+
+// RetrieveStocks from stock exchanges in the nordics -- possible values. RegionAll, RegionStockholm, RegionCopenhagen, RegionHelsinki, RegionIceland, RegionBaltic
+func RetrieveStocks(lists string) *RetrievedListings {
 	client := &http.Client{}
-	req, _ := http.NewRequest("GET", "http://www.nasdaqomxnordic.com/webproxy/DataFeedProxy.aspx?SubSystem=Prices&Action=Search&List=M:INET:XSTO:SEEQ-SHR&List=M:INET:XSTO:SEEQ-SHR-CCP&List=M:INET:XCSE:DKEQ-SHR&List=M:INET:XCSE:DKEQ-SHR-CCP&List=M:INET:XHEL:FIEQ-SHR&List=M:INET:XHEL:FIEQ-SHR-CCP&List=M:INET:XHEL:FIEQ-SHR-IC&List=M:INET:XICE:ISEQ-SHR&List=M:INET:XSTO:SEEQ-SHR-NOK&List=M:INET:XSTO:SEEQ-SHR-AO&List=M:INET:FNSE:SEMM-NM&List=M:INET:FNDK:FNDK-CPH&List=M:INET:FNFI:SEMM-FN-HEL&List=M:INET:FNIS:ISEC-SHR&List=M:INET:FNSE:SEMM-FN-NOK&List=M:INET:FNEE:EEMM-SHR&List=M:INET:FNLV:LVMM-SHR&List=M:INET:FNLT:LTMM-SHR&List=M:INET:FNFI:SEMM-FN-HE-ERW&List=M:INET:XTAL:EEEQ-SHR&List=M:INET:XRIS:LVEQ-SHR&List=M:INET:XLIT:LTEQ-SHR&List=M:GITS:RI:RSEBA&List=M:GITS:TA:TSEBA&List=M:GITS:VI:VSEBA&json=1&callback=jQuery11110636858574942031_1622134931936", nil)
+	req, _ := http.NewRequest("GET", "http://www.nasdaqomxnordic.com/webproxy/DataFeedProxy.aspx?SubSystem=Prices&Action=Search&"+lists+"&json=1", nil)
 	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
 	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
 	req.Header.Set("Cache-Control", "max-age=0")
@@ -28,8 +53,7 @@ func RetrieveStocksFromAPIgo() *RetrievedListings {
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36")
 	resp, _ := client.Do(req)
 	jsonStr, _ := io.ReadAll(resp.Body)
-	inputProperJSONgo := jsonStr[42 : len(jsonStr)-2] //Remove the Jquery String prefix- and suffix
-	data := serialize[RetrievedListings](inputProperJSONgo)
+	data := serialize[RetrievedListings](jsonStr)
 	defer resp.Body.Close()
 	return data
 }
@@ -43,7 +67,6 @@ func RetrieveStock(symbol string) *History {
 	req.Header.Set("Accept", "application/json, text/javascript, */*; q=0.01")
 	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
 	req.Header.Set("Connection", "keep-alive")
-	//req.Header.Set("Referer", "http://www.nasdaqomxnordic.com/aktier/microsite?Instrument=SSE992&name=Hennes%20%26%20Mauritz%20B&ISIN=SE0000106270")
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Safari/537.36")
 	req.Header.Set("X-Requested-With", "XMLHttpRequest")
 	resp, _ := client.Do(req)

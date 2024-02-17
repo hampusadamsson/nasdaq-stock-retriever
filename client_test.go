@@ -24,6 +24,15 @@ func TestRetrieve(t *testing.T) {
 	}
 }
 
+// func TestReal(t *testing.T) {
+// 	data := RetrieveStocksFromAPIgo()
+// 	for _, v := range data.Listings {
+// 		fmt.Println(v.Name)
+// 	}
+// 	fmt.Println(len(data.Listings))
+// 	//fmt.Println(data)
+// }
+
 func TestRetrieveWithTTLcache(t *testing.T) {
 	r := CreateRetriever(RetrieveStocksDummy, 2*time.Second)
 	ts := r.RetrieveStocks().TimeStamp
