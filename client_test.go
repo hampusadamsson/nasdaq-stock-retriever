@@ -17,7 +17,7 @@ func TestSerialise(t *testing.T) {
 }
 
 func TestRetrieve(t *testing.T) {
-	data := RetrieveStocksDummy()
+	data, _ := RetrieveStocksDummy()
 	assert.True(t, len(data.Listings[0].ID) > 2, "Invalid length of ID in return")
 	for _, listing := range data.Listings {
 		assert.True(t, len(listing.ID) > 2, "Invalid length of ID in return")
