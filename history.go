@@ -1,30 +1,38 @@
 package stockclient
 
-// History data struct
 type History struct {
-	Status string `json:"@status"`
-	Ts     string `json:"@ts"`
-	Data   []Data `json:"data"`
+	Data     Data   `json:"data"`
+	Messages any    `json:"messages"`
+	Status   Status `json:"status"`
 }
-
-// Data data struct
-type Data struct {
-	InstData  InstData  `json:"InstData"`
-	ChartData ChartData `json:"ChartData"`
-}
-
-// InstData data struct
-type InstData struct {
-	ID   string `json:"@id"`
-	Nm   string `json:"@nm"`
-	Fnm  string `json:"@fnm"`
-	Isin string `json:"@isin"`
-	Tp   string `json:"@tp"`
-	Chp  string `json:"@chp"`
-	Ycp  string `json:"@ycp"`
-}
-
-// ChartData data struct
 type ChartData struct {
-	Cp [][]float64 `json:"cp"`
+	OrderbookID      string `json:"orderbookId"`
+	AssetClass       string `json:"assetClass"`
+	Isin             string `json:"isin"`
+	Symbol           string `json:"symbol"`
+	Company          string `json:"company"`
+	TimeAsOf         string `json:"timeAsOf"`
+	LastSalePrice    string `json:"lastSalePrice"`
+	NetChange        string `json:"netChange"`
+	PercentageChange string `json:"percentageChange"`
+	DeltaIndicator   string `json:"deltaIndicator"`
+	PreviousClose    string `json:"previousClose"`
+}
+type Z struct {
+	DateTime string `json:"dateTime"`
+	Value    string `json:"value"`
+	High     string `json:"high"`
+	Low      string `json:"low"`
+	Open     string `json:"open"`
+	Close    string `json:"close"`
+	Volume   string `json:"volume"`
+}
+type Cp struct {
+	Z Z       `json:"z"`
+	X int     `json:"x"`
+	Y float64 `json:"y"`
+}
+type Data struct {
+	ChartData ChartData `json:"chartData"`
+	Cp        []Cp      `json:"CP"`
 }

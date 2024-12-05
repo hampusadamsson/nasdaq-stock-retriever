@@ -2,6 +2,7 @@ package stockclient
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -9,42 +10,49 @@ import (
 
 // RetrieveStocksDummy used for testing the proper RetrieveStocksFromAPIgo
 func RetrieveStocksDummy() (*RetrievedListings, error) {
-	stocks := []Stock{{ID: "DUMMY"}}
+	stocks := []Stock{{OrderbookID: "DUMMY", Symbol: "TEST"}}
 	return &RetrievedListings{
-		Listings:  stocks,
-		TimeStamp: time.Now().GoString(),
+		Data: Data2{
+			InstrumentListing: InstrumentListing{
+				Rows: stocks,
+			},
+		},
+		Status: Status{
+			Timestamp: time.Now().GoString(),
+		},
 	}, nil
 }
 
-// FetchAllNordicAssets retrieves data for a wide list of stocks
-func FetchAllNordicAssets() (*RetrievedListings, error) {
-	return RetrieveStocks(RegionAll)
-}
+// // FetchAllNordicAssets retrieves data for a wide list of stocks
+// func FetchAllNordicAssets() (*RetrievedListings, error) {
+// 	return RetrieveStocks(RegionAll)
+// }
 
-// FetchStockholmAssets retrieves data from the Stockholm stock exchange
-func FetchStockholmAssets() (*RetrievedListings, error) {
-	return RetrieveStocks(RegionStockholm)
-}
+// // FetchStockholmAssets retrieves data from the Stockholm stock exchange
+// func FetchStockholmAssets() (*RetrievedListings, error) {
+// 	return RetrieveStocks(RegionStockholm)
+// }
 
-// FetchCopoenhagenAssets retrieves data from the Copenhagen stock exchange
-func FetchCopoenhagenAssets() (*RetrievedListings, error) {
-	return RetrieveStocks(RegionCopenhagen)
-}
+// // FetchCopoenhagenAssets retrieves data from the Copenhagen stock exchange
+// func FetchCopoenhagenAssets() (*RetrievedListings, error) {
+// 	return RetrieveStocks(RegionCopenhagen)
+// }
 
-// FetchBalticAssets retrieves data from the Baltic stock exchange
-func FetchBalticAssets() (*RetrievedListings, error) {
-	return RetrieveStocks(RegionBaltic)
-}
+// // FetchBalticAssets retrieves data from the Baltic stock exchange
+// func FetchBalticAssets() (*RetrievedListings, error) {
+// 	return RetrieveStocks(RegionBaltic)
+// }
 
-// FetchIcelandAssets retrieves data from the Iceland stock exchange
-func FetchIcelandAssets() (*RetrievedListings, error) {
-	return RetrieveStocks(RegionIceland)
-}
+// // FetchIcelandAssets retrieves data from the Iceland stock exchange
+// func FetchIcelandAssets() (*RetrievedListings, error) {
+// 	return RetrieveStocks(RegionIceland)
+// }
 
-// RetrieveStocks from stock exchanges in the nordics -- possible values. RegionAll, RegionStockholm, RegionCopenhagen, RegionHelsinki, RegionIceland, RegionBaltic
-func RetrieveStocks(lists string) (*RetrievedListings, error) {
+func RetrieveStocks() (*RetrievedListings, error) {
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "http://www.nasdaqomxnordic.com/webproxy/DataFeedProxy.aspx?SubSystem=Prices&Action=Search&"+lists+"&json=1", nil)
+	url := "https://api.nasdaq.com/api/nordic/screener/shares?category=MAIN_MARKET&tableonly=true&page=1&size=1000&segment=LARGE_CAP&segment=MID_CAP&segment=SMALL_CAP&lang=en"
+	req, err := http.NewRequest("GET", url, nil)
+	// req, err := http.NewRequest("GET", "http://www.nasdaqomxnordic.com/webproxy/DataFeedProxy.aspx?SubSystem=Prices&Action=Search&"+lists+"&json=1", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +79,8 @@ func RetrieveStocks(lists string) (*RetrievedListings, error) {
 func RetrieveStock(symbol string) (*History, error) {
 	client := &http.Client{}
 	today := time.Now().String()[:10]
-	url := "http://www.nasdaqomxnordic.com/webproxy/DataFeedProxy.aspx?SubSystem=History&Action=GetChartData&inst.an=id%2Cnm%2Cfnm%2Cisin%2Ctp%2Cchp%2Cycp&FromDate=1986-01-01&ToDate=" + today + "&json=true&showAdjusted=true&app=%2Faktier%2Fmicrosite-MicrositeChart-history&timezone=CET&DefaultDecimals=false&Instrument=" + symbol
+	// url := "http://www.nasdaqomxnordic.com/webproxy/DataFeedProxy.aspx?SubSystem=History&Action=GetChartData&inst.an=id%2Cnm%2Cfnm%2Cisin%2Ctp%2Cchp%2Cycp&FromDate=1986-01-01&ToDate=" + today + "&json=true&showAdjusted=true&app=%2Faktier%2Fmicrosite-MicrositeChart-history&timezone=CET&DefaultDecimals=false&Instrument=" + symbol
+	url := fmt.Sprintf("https://api.nasdaq.com/api/nordic/instruments/%s/chart?assetClass=SHARES&fromDate=1986-01-01&toDate=%s&lang=en", symbol, today)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -86,6 +95,7 @@ func RetrieveStock(symbol string) (*History, error) {
 		return nil, err
 	}
 	jsonStr, err := io.ReadAll(resp.Body)
+	// fmt.Println(string(jsonStr))
 	if err != nil {
 		return nil, err
 	}
