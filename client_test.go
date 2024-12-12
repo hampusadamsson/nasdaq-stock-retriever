@@ -50,6 +50,7 @@ func TestSerialiseHistory(t *testing.T) {
 	var d History
 	json.Unmarshal([]byte(jsonString), &d)
 	assert.Equal(t, "SSE36273", d.Data.ChartData.OrderbookID)
+
 }
 
 // func TestRetrieveSpecific(t *testing.T) {
