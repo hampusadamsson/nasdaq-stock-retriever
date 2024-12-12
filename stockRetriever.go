@@ -10,28 +10,28 @@ import (
 
 // Retriever wraps the stock client with a cache
 type Retriever struct {
-	cache ttlcache.Cache[string, RetrievedListings]
+	cache ttlcache.Cache[string, []Stock]
 }
 
-type retrieverFunction func() (*RetrievedListings, error)
+type retrieverFunction func() ([]Stock, error)
 
 // CreateRetriever creates the client and adds a cache with a ttl attached to it
 func CreateRetriever(fun retrieverFunction, ttl time.Duration) *Retriever {
-	loader := ttlcache.LoaderFunc[string, RetrievedListings](
-		func(c *ttlcache.Cache[string, RetrievedListings], key string) *ttlcache.Item[string, RetrievedListings] {
+	loader := ttlcache.LoaderFunc[string, []Stock](
+		func(c *ttlcache.Cache[string, []Stock], key string) *ttlcache.Item[string, []Stock] {
 			log.Println("Cache stale - retrieving data")
 			retrieved, err := fun()
 			if err != nil {
 				fmt.Println("Error", err)
 			}
-			item := c.Set(key, *retrieved, ttlcache.DefaultTTL)
+			item := c.Set(key, retrieved, ttlcache.DefaultTTL)
 			return item
 		},
 	)
 	cache := ttlcache.New(
-		ttlcache.WithTTL[string, RetrievedListings](ttl),
-		ttlcache.WithDisableTouchOnHit[string, RetrievedListings](),
-		ttlcache.WithLoader[string, RetrievedListings](loader),
+		ttlcache.WithTTL[string, []Stock](ttl),
+		ttlcache.WithDisableTouchOnHit[string, []Stock](),
+		ttlcache.WithLoader[string, []Stock](loader),
 	)
 
 	return &Retriever{
@@ -40,7 +40,7 @@ func CreateRetriever(fun retrieverFunction, ttl time.Duration) *Retriever {
 }
 
 // RetrieveStocks retrieve all listings from 1) cache, or 2) from source if stale
-func (r *Retriever) RetrieveStocks() *RetrievedListings {
+func (r *Retriever) RetrieveStocks() []Stock {
 	val := r.cache.Get("stocks").Value()
-	return &val
+	return val
 }

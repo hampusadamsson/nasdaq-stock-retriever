@@ -9,18 +9,9 @@ import (
 )
 
 // RetrieveStocksDummy used for testing the proper RetrieveStocksFromAPIgo
-func RetrieveStocksDummy() (*RetrievedListings, error) {
+func RetrieveStocksDummy() ([]Stock, error) {
 	stocks := []Stock{{OrderbookID: "DUMMY", Symbol: "TEST"}}
-	return &RetrievedListings{
-		Data: Data2{
-			InstrumentListing: InstrumentListing{
-				Rows: stocks,
-			},
-		},
-		Status: Status{
-			Timestamp: time.Now().GoString(),
-		},
-	}, nil
+	return stocks, nil
 }
 
 func RetrieveStocks() ([]Stock, error) {
@@ -32,20 +23,20 @@ func RetrieveStocks() ([]Stock, error) {
 	if err != nil {
 		return nil, err
 	}
-	return append(mm.Data.InstrumentListing.Rows, fn.Data.InstrumentListing.Rows...), nil
+	return append(mm, fn...), nil
 }
 
-func RetrieveStocksMainMarkets() (*RetrievedListings, error) {
+func RetrieveStocksMainMarkets() ([]Stock, error) {
 	url := "https://api.nasdaq.com/api/nordic/screener/shares?category=MAIN_MARKET&tableonly=true&page=1&size=1000&segment=LARGE_CAP&segment=MID_CAP&segment=SPAC&segment=SMALL_CAP&lang=en"
 	return retrieveStocks(url)
 }
 
-func RetrieveStocksFirstNorth() (*RetrievedListings, error) {
+func RetrieveStocksFirstNorth() ([]Stock, error) {
 	url := "https://api.nasdaq.com/api/nordic/screener/shares?category=FIRST_NORTH&tableonly=true&page=1&size=1000&lang=en"
 	return retrieveStocks(url)
 }
 
-func retrieveStocks(url string) (*RetrievedListings, error) {
+func retrieveStocks(url string) ([]Stock, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -67,7 +58,7 @@ func retrieveStocks(url string) (*RetrievedListings, error) {
 	}
 	data := serialize[RetrievedListings](jsonStr)
 	defer resp.Body.Close()
-	return data, nil
+	return data.Data.InstrumentListing.Rows, nil
 }
 
 // RetrieveStock using symbols - ex. SSE992
