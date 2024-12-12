@@ -23,36 +23,31 @@ func RetrieveStocksDummy() (*RetrievedListings, error) {
 	}, nil
 }
 
-// // FetchAllNordicAssets retrieves data for a wide list of stocks
-// func FetchAllNordicAssets() (*RetrievedListings, error) {
-// 	return RetrieveStocks(RegionAll)
-// }
+func RetrieveStocks() ([]Stock, error) {
+	mm, err := RetrieveStocksMainMarkets()
+	if err != nil {
+		return nil, err
+	}
+	fn, err := RetrieveStocksFirstNorth()
+	if err != nil {
+		return nil, err
+	}
+	return append(mm.Data.InstrumentListing.Rows, fn.Data.InstrumentListing.Rows...), nil
+}
 
-// // FetchStockholmAssets retrieves data from the Stockholm stock exchange
-// func FetchStockholmAssets() (*RetrievedListings, error) {
-// 	return RetrieveStocks(RegionStockholm)
-// }
+func RetrieveStocksMainMarkets() (*RetrievedListings, error) {
+	url := "https://api.nasdaq.com/api/nordic/screener/shares?category=MAIN_MARKET&tableonly=true&page=1&size=1000&segment=LARGE_CAP&segment=MID_CAP&segment=SPAC&segment=SMALL_CAP&lang=en"
+	return retrieveStocks(url)
+}
 
-// // FetchCopoenhagenAssets retrieves data from the Copenhagen stock exchange
-// func FetchCopoenhagenAssets() (*RetrievedListings, error) {
-// 	return RetrieveStocks(RegionCopenhagen)
-// }
+func RetrieveStocksFirstNorth() (*RetrievedListings, error) {
+	url := "https://api.nasdaq.com/api/nordic/screener/shares?category=FIRST_NORTH&tableonly=true&page=1&size=1000&lang=en"
+	return retrieveStocks(url)
+}
 
-// // FetchBalticAssets retrieves data from the Baltic stock exchange
-// func FetchBalticAssets() (*RetrievedListings, error) {
-// 	return RetrieveStocks(RegionBaltic)
-// }
-
-// // FetchIcelandAssets retrieves data from the Iceland stock exchange
-// func FetchIcelandAssets() (*RetrievedListings, error) {
-// 	return RetrieveStocks(RegionIceland)
-// }
-
-func RetrieveStocks() (*RetrievedListings, error) {
+func retrieveStocks(url string) (*RetrievedListings, error) {
 	client := &http.Client{}
-	url := "https://api.nasdaq.com/api/nordic/screener/shares?category=MAIN_MARKET&tableonly=true&page=1&size=1000&segment=LARGE_CAP&segment=MID_CAP&segment=SMALL_CAP&lang=en"
 	req, err := http.NewRequest("GET", url, nil)
-	// req, err := http.NewRequest("GET", "http://www.nasdaqomxnordic.com/webproxy/DataFeedProxy.aspx?SubSystem=Prices&Action=Search&"+lists+"&json=1", nil)
 	if err != nil {
 		return nil, err
 	}

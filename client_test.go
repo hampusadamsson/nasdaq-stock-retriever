@@ -2,6 +2,11 @@ package stockclient
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
+	"log"
+	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -54,10 +59,33 @@ func TestSerialiseHistory(t *testing.T) {
 // 	fmt.Println(ret)
 // }
 
-// func TestRetrieveSpecific(t *testing.T) {
-// 	ret, err := RetrieveStocks()
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	fmt.Println(ret.Data.InstrumentListing.Rows[0])
-// }
+func TestRetrieveSpecific(t *testing.T) {
+	ret, err := RetrieveStocks()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, v := range ret {
+		if strings.Contains(v.Symbol, "HM") {
+			fmt.Println(v.OrderbookID, "\t", v.Symbol)
+			fmt.Printf("%+v\n", v)
+		}
+	}
+	// fmt.Println(ret.Data.InstrumentListing.Rows[0])
+}
+
+func TestRetrieveSpecific2(t *testing.T) {
+	a, b := getFirstFloatNotZero("123,1232.123")
+	fmt.Println(a, b)
+}
+
+func getFirstFloatNotZero(values ...string) (float64, error) {
+	for _, v := range values {
+		v = strings.ReplaceAll(v, ",", "")
+		if val, err := strconv.ParseFloat(v, 64); err == nil {
+			if val != 0 {
+				return val, nil
+			}
+		}
+	}
+	return 0, errors.New("no value != 0")
+}
