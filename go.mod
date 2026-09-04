@@ -1,6 +1,6 @@
 module github.com/hampusadamsson/nasdaq-stock-retriever
 
-go 1.18
+go 1.25
 
 require (
 	github.com/jellydator/ttlcache/v3 v3.0.0

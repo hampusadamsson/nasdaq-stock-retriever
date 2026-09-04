@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"time"
 )
@@ -52,12 +53,12 @@ func retrieveStocks(url string) ([]Stock, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer func() { _ = resp.Body.Close() }()
 	jsonStr, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 	data := serialize[RetrievedListings](jsonStr)
-	defer resp.Body.Close()
 	return data.Data.InstrumentListing.Rows, nil
 }
 
@@ -80,18 +81,19 @@ func RetrieveStock(symbol string) (*History, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer func() { _ = resp.Body.Close() }()
 	jsonStr, err := io.ReadAll(resp.Body)
-	// fmt.Println(string(jsonStr))
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 	data := serialize[History](jsonStr)
 	return data, nil
 }
 
 func serialize[T any](jsonStr []byte) *T {
 	var data T
-	json.Unmarshal([]byte(jsonStr), &data)
+	if err := json.Unmarshal(jsonStr, &data); err != nil {
+		log.Println("serialize:", err)
+	}
 	return &data
 }

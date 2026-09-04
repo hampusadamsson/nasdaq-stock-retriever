@@ -7,26 +7,34 @@ Retrieves stocks information from Nasdaq nordic.
 Data is fetched using a REST API client.
 A ttl cache is used to limit requests.
 
+Live API tests are skipped in `-short` mode (used by CI).
+
 ## Example
 
-To fetch all assets
+To fetch all main-market and First North listings:
 
 ```go
-r := CreateRetriever(FetchAllNordicAssets, 2*time.Second)
+r := CreateRetriever(RetrieveStocks, 2*time.Second)
 s := r.RetrieveStocks()
 fmt.Println(s)
 ```
 
-To fetch from specific markets
+To fetch only main markets or First North:
 
 ```go
-// Possible values are:
-// FetchStockholmAssets, FetchCopoenhagenAssets, FetchBalticAssets, FetchIcelandAssets
-r := CreateRetriever(FetchStockholmAssets, 2*time.Second)
-s := r.RetrieveStocks()
-fmt.Println(s)
+r := CreateRetriever(RetrieveStocksMainMarkets, 2*time.Second)
+r2 := CreateRetriever(RetrieveStocksFirstNorth, 2*time.Second)
 ```
+
+To fetch OHLCV history for a symbol (orderbook id):
+
+```go
+h, err := RetrieveStock("SSE992")
+```
+
+Region list constants for Nasdaq Nordic markets: `RegionStockholm`, `RegionCopenhagen`,
+`RegionHelsinki`, `RegionIceland`, `RegionBaltic`, `RegionAll`.
 
 ## License
 
-[MIT](https://choosealicense.com/licenses/mit/)
+[Apache-2.0](https://choosealicense.com/licenses/apache-2.0/)

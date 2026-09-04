@@ -10,7 +10,7 @@ import (
 
 // Retriever wraps the stock client with a cache
 type Retriever struct {
-	cache ttlcache.Cache[string, []Stock]
+	cache *ttlcache.Cache[string, []Stock]
 }
 
 type retrieverFunction func() ([]Stock, error)
@@ -35,7 +35,7 @@ func CreateRetriever(fun retrieverFunction, ttl time.Duration) *Retriever {
 	)
 
 	return &Retriever{
-		cache: *cache,
+		cache: cache,
 	}
 }
 
